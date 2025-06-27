@@ -3,143 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Access Terminal</title>
+    <title>AR Cyber Terminal</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
 </head>
 <body>
+    <!-- Particle Background -->
+    <div id="particles-js"></div>
+
     <!-- Login Form -->
-    <div id="login-form">
-        <h2>Access Terminal</h2>
+    <div id="login-form" class="cyber-container">
+        <h2>AR Cyber Terminal</h2>
         <form onsubmit="event.preventDefault(); showMarkerSelection();">
-            <label for="username">Username:</label>
-            <input type="text" id="username" required>
-            <label for="password">Password:</label>
-            <input type="password" id="password" required>
-            <button type="submit">Login</button>
+            <div class="input-group">
+                <input type="text" id="username" required placeholder="Username">
+                <span class="neon-border"></span>
+            </div>
+            <div class="input-group">
+                <input type="password" id="password" required placeholder="Password">
+                <span class="neon-border"></span>
+            </div>
+            <button type="submit" class="cyber-button">Access System</button>
         </form>
     </div>
 
     <!-- Marker Selection -->
-    <div id="marker-selection" style="display: none;">
-        <h2>Select a Marker</h2>
-        <button onclick="showMarkerScene('hiro')">Hiro Marker</button>
-        <button onclick="showMarkerScene('kanji')">Kanji Marker</button>
-        <button onclick="showMarkerScene('letters')">Letters Marker</button>
+    <div id="marker-selection" class="cyber-container" style="display: none;">
+        <h2>Select AR Marker</h2>
+        <div class="marker-grid">
+            <button class="marker-card" onclick="showMarkerScene('hiro')" data-tilt data-tilt-max="15">
+                <span class="marker-icon">📍</span>
+                <span class="marker-text">Hiro Marker</span>
+            </button>
+            <button class="marker-card" onclick="showMarkerScene('kanji')" data-tilt data-tilt-max="15">
+                <span class="marker-icon">漢</span>
+                <span class="marker-text">Kanji Marker</span>
+            </button>
+            <button class="marker-card" onclick="showMarkerScene('letters')" data-tilt data-tilt-max="15">
+                <span class="marker-icon">🔠</span>
+                <span class="marker-text">Letters Marker</span>
+            </button>
+        </div>
     </div>
 
-    <!-- Container for Marker Scenes (Dynamically Populated) -->
+    <!-- Container for Marker Scenes -->
     <div id="marker-scene-container" style="display: none;"></div>
 
     <script>
-        let currentStream = null; // To store the webcam stream
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00f0ff', '#ff00ff', '#8000ff'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false }
+            },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' } } },
+            retina_detect: true
+        });
+
+        // Initialize Vanilla Tilt for marker cards only on non-touch devices
+        if (!('ontouchstart' in window)) {
+            VanillaTilt.init(document.querySelectorAll('.marker-card'), {
+                max: 15,
+                speed: 400,
+                glare: true,
+                'max-glare': 0.5
+            });
+        }
+
+        let currentStream = null;
 
         function showMarkerSelection() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             if (username && password) {
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('marker-selection').style.display = 'flex';
+                document.getElementById('login-form').style.transition = 'opacity 0.5s';
+                document.getElementById('login-form').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-form').style.display = 'none';
+                    document.getElementById('marker-selection').style.display = 'flex';
+                    document.getElementById('marker-selection').style.opacity = '1';
+                }, 500);
             } else {
                 alert('Please enter username and password');
             }
         }
 
         function showMarkerScene(marker) {
-            // Hide marker selection
-            document.getElementById('marker-selection').style.display = 'none';
-            
-            // Show container
-            const container = document.getElementById('marker-scene-container');
-            container.style.display = 'block';
-            
-            // Clear previous content
-            container.innerHTML = '';
+            // Hide particle background
+            document.getElementById('particles-js').style.display = 'none';
 
-            // Create scene dynamically
-            const scene = document.createElement('a-scene');
-            scene.setAttribute('embedded', '');
-            scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false; sourceWidth: 640; sourceHeight: 480; cameraParametersUrl: assets/camera_para.dat; facingMode: environment;');
+            document.getElementById('marker-selection').style.transition = 'opacity 0.5s';
+            document.getElementById('marker-selection').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('marker-selection').style.display = 'none';
+                const container = document.getElementById('marker-scene-container');
+                container.style.display = 'block';
+                container.innerHTML = '';
 
-            // Create marker based on selection
-            let markerElement = document.createElement('a-marker');
-            let modelPath;
-            if (marker === 'hiro') {
-                markerElement.setAttribute('type', 'pattern');
-                markerElement.setAttribute('url', 'assets/markers/pattern-hiro.patt');
-                modelPath = 'assets/models/object1.glb';
-            } else if (marker === 'kanji') {
-                markerElement.setAttribute('type', 'pattern');
-                markerElement.setAttribute('url', 'assets/markers/pattern-kanji.patt');
-                modelPath = 'assets/models/object2.glb';
-            } else if (marker === 'letters') {
-                markerElement.setAttribute('type', 'pattern');
-                markerElement.setAttribute('url', 'assets/markers/pattern-letters.patt');
-                modelPath = 'assets/models/object3.glb';
-            }
+                const scene = document.createElement('a-scene');
+                scene.setAttribute('embedded', '');
+                scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false; sourceWidth: 640; sourceHeight: 480; cameraParametersUrl: assets/camera_para.dat; facingMode: environment;');
 
-            // Create GLB model
-            const model = document.createElement('a-gltf-model');
-            model.setAttribute('src', modelPath);
-            model.setAttribute('position', '0 0 0');
-            model.setAttribute('scale', '0.5 0.5 0.5'); // Adjust scale as needed
+                let markerElement = document.createElement('a-marker');
+                let modelPath;
+                if (marker === 'hiro') {
+                    markerElement.setAttribute('type', 'pattern');
+                    markerElement.setAttribute('url', 'assets/markers/pattern-hiro.patt');
+                    modelPath = 'assets/models/object1.glb';
+                } else if (marker === 'kanji') {
+                    markerElement.setAttribute('type', 'pattern');
+                    markerElement.setAttribute('url', 'assets/markers/pattern-kanji.patt');
+                    modelPath = 'assets/models/object2.glb';
+                } else if (marker === 'letters') {
+                    markerElement.setAttribute('type', 'pattern');
+                    markerElement.setAttribute('url', 'assets/markers/pattern-letters.patt');
+                    modelPath = 'assets/models/object3.glb';
+                }
 
-            // Create camera
-            const camera = document.createElement('a-entity');
-            camera.setAttribute('camera', '');
+                const model = document.createElement('a-gltf-model');
+                model.setAttribute('src', modelPath);
+                model.setAttribute('position', '0 0 0');
+                model.setAttribute('scale', '0.5 0.5 0.5');
 
-            // Append elements to scene
-            markerElement.appendChild(model);
-            scene.appendChild(markerElement);
-            scene.appendChild(camera);
-            container.appendChild(scene);
+                const camera = document.createElement('a-entity');
+                camera.setAttribute('camera', '');
 
-            // Add back button
-            const backButton = document.createElement('button');
-            backButton.className = 'back-button';
-            backButton.textContent = 'Back';
-            backButton.onclick = backToSelection;
-            container.appendChild(backButton);
+                markerElement.appendChild(model);
+                scene.appendChild(markerElement);
+                scene.appendChild(camera);
+                container.appendChild(scene);
 
-            // Start webcam stream
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-                .then(stream => {
-                    currentStream = stream;
-                })
-                .catch(err => {
-                    console.error('Error accessing webcam:', err);
-                    alert('Failed to access webcam. Please ensure camera permissions are granted.');
+                const backButton = document.createElement('button');
+                backButton.className = 'cyber-button back-button';
+                backButton.textContent = 'Back';
+                backButton.onclick = backToSelection;
+                container.appendChild(backButton);
+
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(stream => {
+                        currentStream = stream;
+                    })
+                    .catch(err => {
+                        console.error('Error accessing webcam:', err);
+                        alert('Failed to access webcam. Please ensure camera permissions are granted.');
+                    });
+
+                model.addEventListener('model-error', (event) => {
+                    console.error('Error loading GLB model:', event.detail.src);
+                    alert('Failed to load model: ' + modelPath);
                 });
-
-            // Handle model loading errors
-            model.addEventListener('model-error', (event) => {
-                console.error('Error loading GLB model:', event.detail.src);
-                alert('Failed to load model: ' + modelPath);
-            });
+            }, 500);
         }
 
         function backToSelection() {
             const container = document.getElementById('marker-scene-container');
             
-            // Stop the webcam stream
             if (currentStream) {
                 currentStream.getTracks().forEach(track => track.stop());
                 currentStream = null;
             }
 
-            // Remove any video elements created by AR.js
             const videoElements = document.querySelectorAll('video');
             videoElements.forEach(video => {
                 video.srcObject = null;
                 video.remove();
             });
 
-            // Clear the container
             container.innerHTML = '';
             container.style.display = 'none';
             
-            // Clean up A-Frame scene
             const scene = document.querySelector('a-scene');
             if (scene) {
                 if (scene.systems['arjs']) {
@@ -149,8 +190,11 @@
                 scene.destroy();
             }
 
-            // Show marker selection
+            // Show particle background again
+            document.getElementById('particles-js').style.display = 'block';
+            document.getElementById('marker-selection').style.transition = 'opacity 0.5s';
             document.getElementById('marker-selection').style.display = 'flex';
+            document.getElementById('marker-selection').style.opacity = '1';
         }
     </script>
 </body>
