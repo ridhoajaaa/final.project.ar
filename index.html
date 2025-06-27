@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Access Terminal</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <!-- Login Form -->
@@ -61,7 +60,7 @@
             // Create scene dynamically
             const scene = document.createElement('a-scene');
             scene.setAttribute('embedded', '');
-            scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false;');
+            scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false; sourceWidth: 640; sourceHeight: 480; cameraParametersUrl: assets/camera_para.dat; facingMode: environment;');
 
             // Create marker based on selection
             let markerElement = document.createElement('a-marker');
@@ -69,18 +68,18 @@
             if (marker === 'hiro') {
                 markerElement.setAttribute('type', 'pattern');
                 markerElement.setAttribute('url', 'assets/markers/pattern-hiro.patt');
-                modelPath = 'assets/models/object1.gltf';
+                modelPath = 'assets/models/object1.glb';
             } else if (marker === 'kanji') {
                 markerElement.setAttribute('type', 'pattern');
                 markerElement.setAttribute('url', 'assets/markers/pattern-kanji.patt');
-                modelPath = 'assets/models/object2.gltf';
+                modelPath = 'assets/models/object2.glb';
             } else if (marker === 'letters') {
                 markerElement.setAttribute('type', 'pattern');
                 markerElement.setAttribute('url', 'assets/markers/pattern-letters.patt');
-                modelPath = 'assets/models/object3.gltf';
+                modelPath = 'assets/models/object3.glb';
             }
 
-            // Create GLTF model
+            // Create GLB model
             const model = document.createElement('a-gltf-model');
             model.setAttribute('src', modelPath);
             model.setAttribute('position', '0 0 0');
@@ -104,11 +103,20 @@
             container.appendChild(backButton);
 
             // Start webcam stream
-            navigator.mediaDevices.getUserMedia({ video: true })
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
                 .then(stream => {
                     currentStream = stream;
                 })
-                .catch(err => console.error('Error accessing webcam:', err));
+                .catch(err => {
+                    console.error('Error accessing webcam:', err);
+                    alert('Failed to access webcam. Please ensure camera permissions are granted.');
+                });
+
+            // Handle model loading errors
+            model.addEventListener('model-error', (event) => {
+                console.error('Error loading GLB model:', event.detail.src);
+                alert('Failed to load model: ' + modelPath);
+            });
         }
 
         function backToSelection() {
