@@ -63,14 +63,6 @@ button:hover {
     color: black;
 }
 
-#marker-scene-container {
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
 .back-button {
     position: absolute;
     top: 10px;
@@ -89,6 +81,15 @@ button:hover {
 .back-button:hover {
     background: #00ff00;
     color: black;
+}
+
+#marker-scene-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
 }
 
 a-scene {
