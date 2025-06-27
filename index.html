@@ -3,65 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Wonderland | Login</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Access Terminal</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="login-container" class="container">
-        <div class="login-box">
-            <h1 class="neon-text">AR WONDERLAND</h1>
-            <form action="#marker-selection">  <!-- Fixed typo in ID -->
-                <div class="input-group">
-                    <input type="text" id="username" placeholder="Username" class="glow-input" required>
-                    <div class="underline"></div>
-                </div>
-                <div class="input-group">
-                    <input type="password" id="password" placeholder="Password" class="glow-input" required>
-                    <div class="underline"></div>
-                </div>
-                <button type="submit" class="btn-pixel">ENTER</button>
-            </form>
-            <div class="particles"></div>
-        </div>
+    <!-- Login Form -->
+    <div id="login-form">
+        <h2>Access Terminal</h2>
+        <form onsubmit="event.preventDefault(); showMarkerSelection();">
+            <label for="username">Username:</label>
+            <input type="text" id="username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" required>
+            <button type="submit">Login</button>
+        </form>
     </div>
 
     <!-- Marker Selection -->
-    <div id="marker-selection" class="container">  <!-- Removed 'hidden' class -->
-        <div class="selection-box">
-            <h2 class="neon-text-alt">CHOOSE YOUR MARKER</h2>
-            <div class="marker-options">
-                <a href="#ar-scene" class="marker-card">  <!-- Changed to link -->
-                    <div class="marker-preview" id="hiro-preview"></div>
-                    <p>Hiro Marker</p>
-                </a>
-                <a href="#ar-scene" class="marker-card">  <!-- Changed to link -->
-                    <div class="marker-preview" id="kanji-preview"></div>
-                    <p>Kanji Marker</p>
-                </a>
-                <a href="#ar-scene" class="marker-card">  <!-- Changed to link -->
-                    <div class="marker-preview" id="letters-preview"></div>
-                    <p>Letters Marker</p>
-                </a>
-            </div>
-        </div>
+    <div id="marker-selection" style="display: none;">
+        <h2>Select a Marker</h2>
+        <button onclick="showMarkerScene('hiro')">Hiro Marker</button>
+        <button onclick="showMarkerScene('kanji')">Kanji Marker</button>
+        <button onclick="showMarkerScene('letters')">Letters Marker</button>
     </div>
 
-    <!-- AR Scene -->
-    <div id="ar-scene" class="container">
-        <a-scene embedded arjs='detectionMode: mono_and_matrix; matrixCodeType: 3x3;'>
-            <!-- (Your AR markers and entities here) -->
-            <a-marker type='pattern' url='assets/markers/pattern-hiro.patt'>
-                <a-entity gltf-model="assets/models/astronaut.glb"></a-entity>
-            </a-marker>
-            <!-- Add other markers here -->
-            <a-entity camera></a-entity>
-        </a-scene>
-        <a href="#" class="btn-pixel floating-btn">BACK</a>
-    </div>
+    <!-- Container for Marker Scenes (Dynamically Populated) -->
+    <div id="marker-scene-container" style="display: none;"></div>
 
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script>
+        let currentStream = null; // To store the webcam stream
+
+        function showMarkerSelection() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (username && password) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('marker-selection').style.display = 'flex';
+            } else {
+                alert('Please enter username and password');
+            }
+        }
+
+        function showMarkerScene(marker) {
+            // Hide marker selection
+            document.getElementById('marker-selection').style.display = 'none';
+            
+            // Show container
+            const container = document.getElementById('marker-scene-container');
+            container.style.display = 'block';
+            
+            // Clear previous content
+            container.innerHTML = '';
+
+            // Create scene dynamically
+            const scene = document.createElement('a-scene');
+            scene.setAttribute('embedded', '');
+            scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false;');
+
+            // Create marker based on selection
+            let markerElement = document.createElement('a-marker');
+            let modelPath;
+            if (marker === 'hiro') {
+                markerElement.setAttribute('type', 'pattern');
+                markerElement.setAttribute('url', 'assets/markers/pattern-hiro.patt');
+                modelPath = 'assets/models/object1.gltf';
+            } else if (marker === 'kanji') {
+                markerElement.setAttribute('type', 'pattern');
+                markerElement.setAttribute('url', 'assets/markers/pattern-kanji.patt');
+                modelPath = 'assets/models/object2.gltf';
+            } else if (marker === 'letters') {
+                markerElement.setAttribute('type', 'pattern');
+                markerElement.setAttribute('url', 'assets/markers/pattern-letters.patt');
+                modelPath = 'assets/models/object3.gltf';
+            }
+
+            // Create GLTF model
+            const model = document.createElement('a-gltf-model');
+            model.setAttribute('src', modelPath);
+            model.setAttribute('position', '0 0 0');
+            model.setAttribute('scale', '0.5 0.5 0.5'); // Adjust scale as needed
+
+            // Create camera
+            const camera = document.createElement('a-entity');
+            camera.setAttribute('camera', '');
+
+            // Append elements to scene
+            markerElement.appendChild(model);
+            scene.appendChild(markerElement);
+            scene.appendChild(camera);
+            container.appendChild(scene);
+
+            // Add back button
+            const backButton = document.createElement('button');
+            backButton.className = 'back-button';
+            backButton.textContent = 'Back';
+            backButton.onclick = backToSelection;
+            container.appendChild(backButton);
+
+            // Start webcam stream
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    currentStream = stream;
+                })
+                .catch(err => console.error('Error accessing webcam:', err));
+        }
+
+        function backToSelection() {
+            const container = document.getElementById('marker-scene-container');
+            
+            // Stop the webcam stream
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+
+            // Remove any video elements created by AR.js
+            const videoElements = document.querySelectorAll('video');
+            videoElements.forEach(video => {
+                video.srcObject = null;
+                video.remove();
+            });
+
+            // Clear the container
+            container.innerHTML = '';
+            container.style.display = 'none';
+            
+            // Clean up A-Frame scene
+            const scene = document.querySelector('a-scene');
+            if (scene) {
+                if (scene.systems['arjs']) {
+                    scene.systems['arjs'].pause();
+                }
+                scene.remove();
+                scene.destroy();
+            }
+
+            // Show marker selection
+            document.getElementById('marker-selection').style.display = 'flex';
+        }
+    </script>
 </body>
 </html>
