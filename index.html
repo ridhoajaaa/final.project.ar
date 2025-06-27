@@ -113,12 +113,24 @@
                 scene.setAttribute('embedded', '');
                 scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false; sourceWidth: 640; sourceHeight: 480; cameraParametersUrl: assets/camera_para.dat; facingMode: environment;');
 
+                // Add ambient and directional light for better model visibility
+                const ambientLight = document.createElement('a-light');
+                ambientLight.setAttribute('type', 'ambient');
+                ambientLight.setAttribute('intensity', '0.5');
+                scene.appendChild(ambientLight);
+
+                const directionalLight = document.createElement('a-light');
+                directionalLight.setAttribute('type', 'directional');
+                directionalLight.setAttribute('intensity', '0.5');
+                directionalLight.setAttribute('position', '1 1 1');
+                scene.appendChild(directionalLight);
+
                 let markerElement = document.createElement('a-marker');
                 let modelPath;
                 if (marker === 'hiro') {
                     markerElement.setAttribute('type', 'pattern');
                     markerElement.setAttribute('url', 'assets/markers/pattern-hiro.patt');
-                    modelPath = 'assets/models/object1.glb';
+                    modelPath = 'assets/models/object1.glb'; // Path to Poly Pizza model
                 } else if (marker === 'kanji') {
                     markerElement.setAttribute('type', 'pattern');
                     markerElement.setAttribute('url', 'assets/markers/pattern-kanji.patt');
@@ -131,8 +143,8 @@
 
                 const model = document.createElement('a-gltf-model');
                 model.setAttribute('src', modelPath);
-                model.setAttribute('position', '0 0 0');
-                model.setAttribute('scale', '0.5 0.5 0.5');
+                model.setAttribute('position', '0 0.5 0'); // Slightly above marker
+                model.setAttribute('scale', '2 2 2'); // Increased scale for better visibility
 
                 const camera = document.createElement('a-entity');
                 camera.setAttribute('camera', '');
@@ -159,7 +171,11 @@
 
                 model.addEventListener('model-error', (event) => {
                     console.error('Error loading GLB model:', event.detail.src);
-                    alert('Failed to load model: ' + modelPath);
+                    alert('Failed to load model: ' + modelPath + '. Check file path or model validity.');
+                });
+
+                model.addEventListener('model-loaded', () => {
+                    console.log('Model loaded successfully:', modelPath);
                 });
             }, 500);
         }
