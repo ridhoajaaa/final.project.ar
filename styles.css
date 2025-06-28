@@ -40,9 +40,9 @@ h2 {
 
 .input-group {
     position: relative;
-    margin: 15px auto; /* Centered with auto margin */
+    margin: 15px auto;
     width: 100%;
-    max-width: 300px; /* Limit input width for symmetry */
+    max-width: 300px;
     text-align: center;
 }
 
@@ -57,7 +57,7 @@ input {
     font-size: 16px;
     outline: none;
     transition: border-bottom-color 0.3s;
-    box-sizing: border-box; /* Ensure padding doesn't affect width */
+    box-sizing: border-box;
 }
 
 input:focus {
@@ -72,12 +72,12 @@ input::placeholder {
     position: absolute;
     bottom: -2px;
     left: 0;
-    right: 0; /* Ensure full width coverage */
+    right: 0;
     width: 100%;
     height: 2px;
     background: linear-gradient(to right, transparent 10%, #00f0ff 50%, transparent 90%); /* Centered gradient */
     animation: neon-flicker 2s infinite;
-    transform: translateX(0); /* Ensure no shift */
+    transform: translateX(0);
 }
 
 @keyframes neon-flicker {
@@ -192,7 +192,7 @@ a-scene {
     }
 
     .input-group {
-        max-width: 260px; /* Slightly smaller for HP */
+        max-width: 260px;
     }
 
     input {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AR Cyber Terminal</title>
+    <title>AR JS Marker Scanning</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -12,12 +12,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.2/vanilla-tilt.min.js"></script>
 </head>
 <body>
-    <!-- Particle Background -->
     <div id="particles-js"></div>
 
-    <!-- Login Form -->
     <div id="login-form" class="cyber-container">
-        <h2>AR Cyber Terminal</h2>
+        <h2>AR JS Login  Form</h2>
         <form onsubmit="event.preventDefault(); showMarkerSelection();">
             <div class="input-group">
                 <input type="text" id="username" required placeholder="Username">
@@ -31,7 +29,6 @@
         </form>
     </div>
 
-    <!-- Marker Selection -->
     <div id="marker-selection" class="cyber-container" style="display: none;">
         <h2>Select AR Marker</h2>
         <div class="marker-grid">
@@ -50,11 +47,9 @@
         </div>
     </div>
 
-    <!-- Container for Marker Scenes -->
     <div id="marker-scene-container" style="display: none;"></div>
 
     <script>
-        // Initialize Particles.js
         particlesJS('particles-js', {
             particles: {
                 number: { value: 60, density: { enable: true, value_area: 800 } },
@@ -69,7 +64,6 @@
             retina_detect: true
         });
 
-        // Initialize Vanilla Tilt for marker cards only on non-touch devices
         if (!('ontouchstart' in window)) {
             VanillaTilt.init(document.querySelectorAll('.marker-card'), {
                 max: 15,
@@ -98,9 +92,7 @@
         }
 
         function showMarkerScene(marker) {
-            // Hide particle background
             document.getElementById('particles-js').style.display = 'none';
-
             document.getElementById('marker-selection').style.transition = 'opacity 0.5s';
             document.getElementById('marker-selection').style.opacity = '0';
             setTimeout(() => {
@@ -113,7 +105,6 @@
                 scene.setAttribute('embedded', '');
                 scene.setAttribute('arjs', 'sourceType: webcam; trackingBackend: artoolkit; markersAreaEnabled: false; sourceWidth: 640; sourceHeight: 480; cameraParametersUrl: assets/camera_para.dat; facingMode: environment;');
 
-                // Add ambient and directional light for better model visibility
                 const ambientLight = document.createElement('a-light');
                 ambientLight.setAttribute('type', 'ambient');
                 ambientLight.setAttribute('intensity', '0.5');
@@ -143,8 +134,8 @@
 
                 const model = document.createElement('a-gltf-model');
                 model.setAttribute('src', modelPath);
-                model.setAttribute('position', '0 0.5 0'); // Slightly above marker
-                model.setAttribute('scale', '2 2 2'); // Increased scale for better visibility
+                model.setAttribute('position', '0 0.5 0');
+                model.setAttribute('scale', '2 2 2');
 
                 const camera = document.createElement('a-entity');
                 camera.setAttribute('camera', '');
@@ -206,7 +197,6 @@
                 scene.destroy();
             }
 
-            // Show particle background again
             document.getElementById('particles-js').style.display = 'block';
             document.getElementById('marker-selection').style.transition = 'opacity 0.5s';
             document.getElementById('marker-selection').style.display = 'flex';
